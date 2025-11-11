@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  terranote-core:
+    build:
+      context: ../../terranote-core
+      dockerfile: Dockerfile
+    container_name: terranote-core
+    environment:
+      - LOGLEVEL=info
+      - OSM_API_BASE_URL=http://fake-osm:8080
+      - NOTIFIER_WHATSAPP_ENDPOINT=http://adapter:8001/callbacks/note-created
+    depends_on:
+      fake-osm:
+        condition: service_started
+    ports:
+      - "8000:8000"
+    command: >
+      uvicorn app.main:app
+      --host 0.0.0.0
+      --port 8000
+
+  adapter:
+    build:
+      context: ../../terranote-adapter-whatsapp
+    container_name: terranote-adapter-whatsapp
+    env_file:
+      - env.whatsapp
+    environment:
+      CORE_API_BASE_URL: http://terranote-core:8000
+      CORE_API_TIMEOUT_SECONDS: 5.0
+    depends_on:
+      terranote-core:
+        condition: service_started
+    ports:
+      - "8001:8000"
+    command: >
+      uvicorn terranote_adapter_whatsapp.main:app
+      --host 0.0.0.0
+      --port 8000
+
+  fake-osm:
+    build:
+      context: ../../terranote-core
+      dockerfile: Dockerfile
+    container_name: terranote-fake-osm
+    command: >
+      uvicorn fakes.osm_api:app
+      --host 0.0.0.0
+      --port 8080
+    ports:
+      - "8080:8080"
+
+
