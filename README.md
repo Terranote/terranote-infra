@@ -4,9 +4,10 @@ Infraestructura compartida para el ecosistema Terranote. Este repositorio reúne
 
 ## Requisitos previos
 
-- Clonar los repositorios de aplicación dentro del mismo directorio base:
+- Clonar los repositorios de aplicación y herramientas dentro del mismo directorio base:
   - [`terranote-core`](https://github.com/Terranote/terranote-core)
   - [`terranote-adapter-whatsapp`](https://github.com/Terranote/terranote-adapter-whatsapp)
+  - [`terranote-tests`](https://github.com/Terranote/terranote-tests)
   - (Opcional) Otros adaptadores según se vayan añadiendo.
 - Docker y Docker Compose v2.
 - Acceso a los tokens necesarios de WhatsApp Cloud API para pruebas reales.
@@ -17,6 +18,7 @@ La estructura recomendada es:
 ~/proyectos/
 ├── terranote-core/
 ├── terranote-adapter-whatsapp/
+├── terranote-tests/
 └── terranote-infra/
 ```
 
@@ -50,6 +52,12 @@ Servicios incluidos:
 3. Abre un túnel (`ngrok http 8001` o `cloudflared tunnel run`) y registra la URL pública en la consola de WhatsApp Cloud API, utilizando el verify token configurado.
 4. Sigue las guías de los repositorios de aplicación para enviar mensajes de prueba y confirmar la creación de notas.
 
+## Documentación relacionada
+
+- Guía end-to-end del núcleo: [`terranote-core/docs/e2e-guide.md`](https://github.com/Terranote/terranote-core/blob/main/docs/e2e-guide.md)
+- Estrategia documental global: [`terranote-docs`](https://github.com/Terranote/terranote-docs)
+- Detalles de escenarios de prueba: [`terranote-tests`](https://github.com/Terranote/terranote-tests)
+
 ## Próximos pasos
 
 - Añadir escenarios adicionales (Telegram, plugins multimedia, observabilidad).
@@ -59,6 +67,3 @@ Servicios incluidos:
 ## Licencia
 
 GPL-3.0-or-later. Consulte el archivo `LICENSE` para más detalles.
-
-# terranote-infra
-Infraestructura compartida de Terranote. Contiene los entornos docker-compose, scripts de despliegue y herramientas auxiliares para orquestar terranote-core, los adaptadores (WhatsApp, Telegram, etc.), fakes de OSM y servicios de observabilidad en escenarios de desarrollo, pruebas y producción.
