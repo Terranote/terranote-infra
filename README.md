@@ -79,11 +79,11 @@ sudo journalctl -u terranote-adapter-telegram -f
 sudo journalctl -u terranote-core -f
 ```
 
-## Prometheus Monitoring
+## Prometheus & Grafana Monitoring
 
 Ubicación: `prometheus/`
 
-Configuración de Prometheus para scrapear métricas de los servicios de Terranote:
+Configuración de Prometheus y Grafana para monitorear los servicios de Terranote:
 
 - `terranote-adapter-telegram` - Métricas del adaptador de Telegram
 - `terranote-core` - Métricas del Core API
@@ -97,7 +97,10 @@ cd prometheus
 docker compose up -d
 ```
 
-Prometheus estará disponible en `http://localhost:9090`.
+- **Prometheus**: `http://localhost:9090`
+- **Grafana**: `http://localhost:3001` (usuario: `admin`, contraseña: `admin`)
+
+El dashboard "Terranote Overview" se carga automáticamente en Grafana.
 
 ## Próximos pasos
 

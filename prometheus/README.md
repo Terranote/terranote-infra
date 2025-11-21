@@ -159,12 +159,40 @@ ip addr show docker0 | grep inet
 # O usar network_mode: host en docker-compose.yml
 ```
 
+## Grafana Dashboards
+
+Grafana está incluido en el `docker-compose.yml` y se configura automáticamente.
+
+### Acceder a Grafana
+
+1. Inicia los servicios:
+   ```bash
+   docker compose up -d
+   ```
+
+2. Accede a Grafana:
+   - URL: `http://localhost:3001`
+   - Usuario: `admin`
+   - Contraseña: `admin` (cambiar en producción)
+
+3. El dashboard "Terranote Overview" se carga automáticamente.
+
+### Dashboards Disponibles
+
+- **Terranote Overview**: Dashboard principal con métricas de HTTP, APIs, mensajes y sistema
+
+### Cambiar Contraseña de Grafana
+
+1. Accede a Grafana: `http://localhost:3001`
+2. Ve a Configuration → Users → Change Password
+3. O modifica `GF_SECURITY_ADMIN_PASSWORD` en `docker-compose.yml`
+
 ## Próximos Pasos
 
 - [ ] Configurar Alertmanager para alertas
 - [ ] Crear reglas de alerta (ver `alerts.yml.example`)
-- [ ] Integrar con Grafana para dashboards
 - [ ] Configurar retención de datos a largo plazo
+- [ ] Cambiar contraseña por defecto de Grafana en producción
 
 ## Referencias
 

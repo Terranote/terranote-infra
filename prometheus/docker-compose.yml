@@ -22,8 +22,30 @@ services:
     networks:
       - terranote-monitoring
 
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: terranote-grafana
+    restart: unless-stopped
+    ports:
+      - '3001:3000'
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3001
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - terranote-monitoring
+    depends_on:
+      - prometheus
+
 volumes:
   prometheus-data:
+    driver: local
+  grafana-data:
     driver: local
 
 networks:
