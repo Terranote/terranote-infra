@@ -20,17 +20,25 @@ SERVICE_PORT="8002"
 echo -e "${YELLOW}=== Configuración de Métricas de Terranote Core ===${NC}"
 echo ""
 
-# Verificar permisos sudo
-if ! sudo -n true 2>/dev/null; then
-    echo -e "${YELLOW}Advertencia: Este script requiere permisos sudo sin contraseña${NC}"
-    echo "Si el usuario no tiene permisos sudo configurados, algunos comandos fallarán"
-    echo ""
-    read -p "¿Continuar de todas formas? (s/n): " -n 1 -r
-    echo ""
-    if [[ ! $REPLY =~ ^[Ss]$ ]]; then
-        exit 1
+# Verificar si somos root o tenemos sudo
+if [ "$EUID" -eq 0 ]; then
+    SUDO_CMD=""
+    echo -e "${GREEN}Ejecutando como root${NC}"
+else
+    if ! sudo -n true 2>/dev/null; then
+        echo -e "${YELLOW}Advertencia: Este script requiere permisos sudo sin contraseña${NC}"
+        echo "Si el usuario terranote no tiene permisos sudo configurados, algunos comandos fallarán"
+        echo ""
+        read -p "¿Continuar de todas formas? (s/n): " -n 1 -r
+        echo ""
+        if [[ ! $REPLY =~ ^[Ss]$ ]]; then
+            exit 1
+        fi
     fi
+    SUDO_CMD="sudo"
+    echo -e "${GREEN}Ejecutando como usuario: $(whoami)${NC}"
 fi
+echo ""
 
 # Verificar que estamos en el servidor correcto
 if [ ! -f "$CLOUDFLARED_CONFIG" ]; then
@@ -89,10 +97,10 @@ else
     echo -e "${YELLOW}Agregando hostname $HOSTNAME...${NC}"
     
     # Hacer backup
-    sudo cp "$CLOUDFLARED_CONFIG" "${CLOUDFLARED_CONFIG}.backup.$(date +%Y%m%d_%H%M%S)"
+    $SUDO_CMD cp "$CLOUDFLARED_CONFIG" "${CLOUDFLARED_CONFIG}.backup.$(date +%Y%m%d_%H%M%S)"
     
     # Agregar el hostname antes del catch-all (http_status:404)
-    sudo sed -i "/http_status:404/i\ - hostname: $HOSTNAME\\"$'\n'"   service: http://localhost:$SERVICE_PORT" "$CLOUDFLARED_CONFIG"
+    $SUDO_CMD sed -i "/http_status:404/i\ - hostname: $HOSTNAME\\"$'\n'"   service: http://localhost:$SERVICE_PORT" "$CLOUDFLARED_CONFIG"
     
     echo -e "${GREEN}✓ Hostname agregado a cloudflared${NC}"
 fi
@@ -102,33 +110,33 @@ echo -e "${YELLOW}3. Reiniciando servicios...${NC}"
 
 # Reiniciar terranote-core
 echo "  Reiniciando terranote-core..."
-sudo systemctl restart terranote-core
+$SUDO_CMD systemctl restart terranote-core
 
 # Esperar un momento
 sleep 2
 
 # Verificar que terranote-core esté corriendo
-if sudo systemctl is-active --quiet terranote-core; then
+if $SUDO_CMD systemctl is-active --quiet terranote-core; then
     echo -e "${GREEN}✓ terranote-core reiniciado correctamente${NC}"
 else
     echo -e "${RED}✗ Error al reiniciar terranote-core${NC}"
-    sudo systemctl status terranote-core --no-pager -l | head -10
+    $SUDO_CMD systemctl status terranote-core --no-pager -l | head -10
     exit 1
 fi
 
 # Reiniciar cloudflared
 echo "  Reiniciando cloudflared..."
-sudo systemctl restart cloudflared
+$SUDO_CMD systemctl restart cloudflared
 
 # Esperar un momento
 sleep 2
 
 # Verificar que cloudflared esté corriendo
-if sudo systemctl is-active --quiet cloudflared; then
+if $SUDO_CMD systemctl is-active --quiet cloudflared; then
     echo -e "${GREEN}✓ Cloudflared reiniciado correctamente${NC}"
 else
     echo -e "${RED}✗ Error al reiniciar cloudflared${NC}"
-    sudo systemctl status cloudflared --no-pager -l | head -10
+    $SUDO_CMD systemctl status cloudflared --no-pager -l | head -10
     exit 1
 fi
 
