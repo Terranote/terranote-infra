@@ -1,0 +1,10 @@
+# Environment variables with secrets
+.env
+
+# Backup files
+*.backup
+*.tmp
+
+# Generated prometheus.yml with credentials (if using template)
+# prometheus.yml
+

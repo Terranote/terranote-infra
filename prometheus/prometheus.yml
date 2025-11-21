@@ -1,0 +1,45 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'terranote-production'
+    environment: 'production'
+
+# Alertmanager configuration (optional, for future use)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+# Rule files (optional, for future use)
+# rule_files:
+#   - 'alerts.yml'
+
+scrape_configs:
+  # Terranote Telegram Adapter
+  - job_name: 'terranote-adapter-telegram'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: '/metrics'
+    basic_auth:
+      username: 'admin'
+      password: 'LsomfLACzZ2ZwkO41AE2jzSf/ehqWXBM'
+    static_configs:
+      - targets:
+          - 'host.docker.internal:3000'  # Access host from Docker
+        labels:
+          service: 'telegram-adapter'
+          component: 'adapter'
+
+  # Terranote Core API
+  - job_name: 'terranote-core'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: '/metrics'
+    static_configs:
+      - targets:
+          - 'host.docker.internal:8002'  # Access host from Docker
+        labels:
+          service: 'core'
+          component: 'api'
+
