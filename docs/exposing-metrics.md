@@ -1,6 +1,6 @@
 # Exponer Métricas Públicamente con Cloudflare Tunnel
 
-Esta guía explica cómo exponer el endpoint de métricas del adaptador de Telegram públicamente usando un subdominio de `osm.lat` a través de Cloudflare Tunnel.
+Esta guía explica cómo exponer los endpoints de métricas de los servicios Terranote (adaptador de Telegram y terranote-core) públicamente usando subdominios de `osm.lat` a través de Cloudflare Tunnel.
 
 ## Consideraciones de Seguridad
 
@@ -199,6 +199,120 @@ scrape_configs:
 - Verificar que el adaptador esté corriendo: `curl http://localhost:3000/health`
 - Verificar que haya tráfico (las métricas solo aparecen después de requests)
 - Hacer algunas peticiones: `curl http://localhost:3000/health`
+
+## Configuración para Terranote Core
+
+### Script Automatizado (Recomendado)
+
+Usa el script automatizado que configura todo:
+
+```bash
+cd /home/angoca/github/terranote-infra
+bash scripts/setup-core-metrics-tunnel.sh
+```
+
+Este script:
+1. Genera una contraseña segura si no existe
+2. Agrega `METRICS_USERNAME` y `METRICS_PASSWORD` al `.env` de terranote-core
+3. Configura el hostname en cloudflared
+4. Reinicia los servicios necesarios
+
+### Configuración Manual
+
+#### 1. Configurar autenticación
+
+En el servidor, editar `/home/terranote/terranote-core/.env`:
+
+```bash
+METRICS_USERNAME=admin
+METRICS_PASSWORD=tu_contraseña_segura_aqui
+```
+
+**Generar contraseña segura:**
+```bash
+openssl rand -base64 32
+```
+
+#### 2. Reiniciar terranote-core
+
+```bash
+sudo systemctl restart terranote-core
+```
+
+#### 3. Configurar subdominio en Cloudflare DNS
+
+1. Ir a Cloudflare Dashboard → DNS
+2. Agregar registro CNAME:
+   - **Nombre**: `terranote-core-metrics`
+   - **Target**: `1b718247-fe2d-4391-84c0-819c1501e6c2.cfargotunnel.com`
+   - **Proxy**: Activado
+
+#### 4. Actualizar configuración de cloudflared
+
+Editar `/etc/cloudflared/config.yml`:
+
+```yaml
+ingress:
+  # ... otros hostnames existentes ...
+  - hostname: terranote-core-metrics.osm.lat
+    service: http://localhost:8002
+  - service: http_status:404
+```
+
+O usar el script:
+```bash
+sudo bash /home/angoca/github/terranote-infra/scripts/update-cloudflared-core-metrics.sh
+```
+
+#### 5. Reiniciar cloudflared
+
+```bash
+sudo systemctl restart cloudflared
+```
+
+#### 6. Verificar acceso
+
+```bash
+# Localmente
+curl -u admin:TU_CONTRASEÑA http://localhost:8002/metrics
+
+# Públicamente (después de configurar DNS)
+curl -u admin:TU_CONTRASEÑA https://terranote-core-metrics.osm.lat/metrics
+```
+
+## Resumen de Endpoints
+
+### Estructura de subdominios recomendada:
+
+- `terranote-tg.osm.lat` → Webhook principal de Telegram (ya configurado)
+- `terranote-tg-health.osm.lat` → Health check de Telegram (sin autenticación, seguro)
+- `terranote-tg-metrics.osm.lat` → Métricas de Telegram (con autenticación básica)
+- `terranote-core-metrics.osm.lat` → Métricas de Core (con autenticación básica)
+
+### Configuración de cloudflared completa:
+
+```yaml
+tunnel: 1b718247-fe2d-4391-84c0-819c1501e6c2
+credentials-file: /root/.cloudflared/1b718247-fe2d-4391-84c0-819c1501e6c2.json
+warp-routing:
+  enabled: true
+ingress:
+ - hostname: geoserver.osm.lat
+   service: http://localhost:8888
+ - hostname: opendrone.osm.lat
+   service: http://localhost:8000
+ - hostname: terranote-wa.osm.lat
+   service: http://localhost:8001
+ - hostname: terranote-tg.osm.lat
+   service: http://localhost:3000
+ - hostname: terranote-tg-health.osm.lat
+   service: http://localhost:3000
+ - hostname: terranote-tg-metrics.osm.lat
+   service: http://localhost:3000
+ - hostname: terranote-core-metrics.osm.lat
+   service: http://localhost:8002
+ - service: http_status:404
+```
 
 ## Referencias
 
