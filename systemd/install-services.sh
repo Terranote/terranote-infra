@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
 # Script para instalar los servicios systemd de Terranote
-# Ejecutar con: bash install-services.sh
+# Ejecutar con: bash systemd/install-services.sh
+# Requiere permisos sudo
 
 set -euo pipefail
+
+# Verificar que se puede ejecutar sudo
+if ! sudo -n true 2>/dev/null; then
+    echo "Este script requiere permisos sudo."
+    echo "Se te pedirá la contraseña cuando sea necesario."
+    echo ""
+fi
 
 echo "=== Instalación de servicios systemd para Terranote ==="
 echo ""
