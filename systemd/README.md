@@ -9,26 +9,42 @@ This directory contains systemd service files for managing Terranote services on
 
 ## Installation
 
-### 1. Copy service files to systemd directory
+### Option 1: Using the installation script (Recommended)
+
+The script can be run as `root` or with a user that has `sudo` privileges:
+
+```bash
+# As user with sudo (e.g., angoca)
+cd /home/terranote/terranote-infra
+git pull
+bash systemd/install-services.sh
+
+# Or as root
+sudo bash systemd/install-services.sh
+```
+
+### Option 2: Manual installation
+
+#### 1. Copy service files to systemd directory
 
 ```bash
 sudo cp systemd/*.service /etc/systemd/system/
 ```
 
-### 2. Reload systemd configuration
+#### 2. Reload systemd configuration
 
 ```bash
 sudo systemctl daemon-reload
 ```
 
-### 3. Enable services to start on boot
+#### 3. Enable services to start on boot
 
 ```bash
 sudo systemctl enable terranote-adapter-telegram
 sudo systemctl enable terranote-core
 ```
 
-### 4. Start services
+#### 4. Start services
 
 ```bash
 sudo systemctl start terranote-adapter-telegram
@@ -192,6 +208,18 @@ If the service fails because Node.js or Poetry is not found:
 
 2. If using nvm or custom installation, update the ExecStart path in the service file.
 
+### Git safe.directory error
+
+If you see "dubious ownership" errors when running `git pull`:
+
+```bash
+# As the user that owns the repository (e.g., angoca)
+git config --global --add safe.directory /home/terranote/terranote-infra
+
+# Or as terranote user
+sudo -u terranote git config --global --add safe.directory /home/terranote/terranote-infra
+```
+
 ## Security Considerations
 
 The service files include security hardening:
@@ -207,4 +235,3 @@ The service files include security hardening:
 - [systemd.service man page](https://www.freedesktop.org/software/systemd/man/systemd.service.html)
 - [journalctl man page](https://www.freedesktop.org/software/systemd/man/journalctl.html)
 - [systemd-journald.service](https://www.freedesktop.org/software/systemd/man/systemd-journald.service.html)
-
