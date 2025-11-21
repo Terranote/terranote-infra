@@ -1,0 +1,29 @@
+[Unit]
+Description=Terranote Telegram Adapter
+Documentation=https://github.com/Terranote/terranote-adapter-telegram
+After=network.target
+
+[Service]
+Type=simple
+User=terranote
+Group=terranote
+WorkingDirectory=/home/terranote/terranote-adapter-telegram
+Environment="NODE_ENV=production"
+EnvironmentFile=/home/terranote/terranote-adapter-telegram/.env
+ExecStart=/usr/bin/npm --prefix /home/terranote/terranote-adapter-telegram start
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=terranote-adapter-telegram
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/terranote/terranote-adapter-telegram
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,29 @@
+[Unit]
+Description=Terranote Core API
+Documentation=https://github.com/Terranote/terranote-core
+After=network.target
+
+[Service]
+Type=simple
+User=terranote
+Group=terranote
+WorkingDirectory=/home/terranote/terranote-core
+Environment="PYTHONUNBUFFERED=1"
+EnvironmentFile=/home/terranote/terranote-core/.env
+ExecStart=/home/terranote/.local/bin/poetry run uvicorn app.main:app --host 127.0.0.1 --port 8002
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=terranote-core
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/terranote/terranote-core
+
+[Install]
+WantedBy=multi-user.target
+

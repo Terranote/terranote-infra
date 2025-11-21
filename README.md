@@ -58,6 +58,27 @@ Servicios incluidos:
 - Estrategia documental global: [`terranote-docs`](https://github.com/Terranote/terranote-docs)
 - Detalles de escenarios de prueba: [`terranote-tests`](https://github.com/Terranote/terranote-tests)
 
+## Systemd Services
+
+Ubicación: `systemd/`
+
+Archivos de servicio systemd para gestionar los servicios de Terranote en producción:
+
+- `terranote-adapter-telegram.service` - Adaptador de Telegram
+- `terranote-core.service` - API central
+
+Ver [`systemd/README.md`](systemd/README.md) para instrucciones de instalación y gestión.
+
+### Logging con journald
+
+Todos los servicios están configurados para usar journald de systemd. Los logs se capturan automáticamente y se pueden consultar con:
+
+```bash
+# Ver logs en tiempo real
+sudo journalctl -u terranote-adapter-telegram -f
+sudo journalctl -u terranote-core -f
+```
+
 ## Próximos pasos
 
 - Añadir escenarios adicionales (Telegram, plugins multimedia, observabilidad).
