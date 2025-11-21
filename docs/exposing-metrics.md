@@ -211,6 +211,10 @@ cd /home/angoca/github/terranote-infra
 bash scripts/setup-core-metrics-tunnel.sh
 ```
 
+**Requisitos:**
+- El usuario debe tener permisos sudo sin contraseña (NOPASSWD) configurados
+- Si el usuario `terranote` no tiene contraseña, debe tener permisos sudo configurados en `/etc/sudoers`
+
 Este script:
 1. Genera una contraseña segura si no existe
 2. Agrega `METRICS_USERNAME` y `METRICS_PASSWORD` al `.env` de terranote-core

@@ -1,6 +1,7 @@
 #!/bin/bash
 # Script para actualizar cloudflared con el hostname de métricas de terranote-core
-# Ejecutar con: sudo bash update-cloudflared-core-metrics.sh
+# Ejecutar con: bash update-cloudflared-core-metrics.sh
+# Requisitos: El usuario debe tener permisos sudo sin contraseña (NOPASSWD)
 
 set -e
 
@@ -10,6 +11,13 @@ SERVICE_PORT="8002"
 
 echo "=== Actualizando configuración de cloudflared ==="
 echo ""
+
+# Verificar permisos sudo
+if ! sudo -n true 2>/dev/null; then
+    echo "⚠️  Advertencia: Este script requiere permisos sudo sin contraseña"
+    echo "Si el usuario no tiene permisos sudo configurados, el script fallará"
+    echo ""
+fi
 
 # Verificar que el archivo existe
 if [ ! -f "$CONFIG_FILE" ]; then

@@ -1,6 +1,7 @@
 #!/bin/bash
 # Script para configurar el túnel de métricas de terranote-core con Cloudflare
 # Ejecutar con: bash setup-core-metrics-tunnel.sh
+# Requisitos: El usuario debe tener permisos sudo sin contraseña (NOPASSWD)
 
 set -e
 
@@ -18,6 +19,18 @@ SERVICE_PORT="8002"
 
 echo -e "${YELLOW}=== Configuración de Métricas de Terranote Core ===${NC}"
 echo ""
+
+# Verificar permisos sudo
+if ! sudo -n true 2>/dev/null; then
+    echo -e "${YELLOW}Advertencia: Este script requiere permisos sudo sin contraseña${NC}"
+    echo "Si el usuario no tiene permisos sudo configurados, algunos comandos fallarán"
+    echo ""
+    read -p "¿Continuar de todas formas? (s/n): " -n 1 -r
+    echo ""
+    if [[ ! $REPLY =~ ^[Ss]$ ]]; then
+        exit 1
+    fi
+fi
 
 # Verificar que estamos en el servidor correcto
 if [ ! -f "$CLOUDFLARED_CONFIG" ]; then
