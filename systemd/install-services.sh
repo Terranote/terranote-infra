@@ -22,11 +22,17 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Verificar que estamos en el directorio correcto
-if [ ! -f "systemd/terranote-adapter-telegram.service" ]; then
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+INFRA_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+if [ ! -f "$INFRA_DIR/systemd/terranote-adapter-telegram.service" ]; then
     echo -e "${RED}Error: No se encontraron los archivos de servicio.${NC}"
-    echo "Ejecuta este script desde el directorio terranote-infra"
+    echo "Ejecuta este script desde el directorio terranote-infra o desde systemd/"
     exit 1
 fi
+
+# Cambiar al directorio de infra si es necesario
+cd "$INFRA_DIR"
 
 echo -e "${YELLOW}1. Deteniendo procesos manuales (si existen)...${NC}"
 
@@ -59,32 +65,56 @@ echo -e "${GREEN}✓ Procesos manuales detenidos${NC}"
 echo ""
 
 echo -e "${YELLOW}2. Copiando archivos de servicio a /etc/systemd/system/...${NC}"
-sudo cp systemd/*.service /etc/systemd/system/
+if [ "$EUID" -eq 0 ]; then
+    cp systemd/*.service /etc/systemd/system/
+else
+    sudo cp systemd/*.service /etc/systemd/system/
+fi
 echo -e "${GREEN}✓ Archivos copiados${NC}"
 echo ""
 
 echo -e "${YELLOW}3. Recargando configuración de systemd...${NC}"
-sudo systemctl daemon-reload
+if [ "$EUID" -eq 0 ]; then
+    systemctl daemon-reload
+else
+    sudo systemctl daemon-reload
+fi
 echo -e "${GREEN}✓ systemd recargado${NC}"
 echo ""
 
 echo -e "${YELLOW}4. Habilitando servicios para inicio automático...${NC}"
-sudo systemctl enable terranote-adapter-telegram
-sudo systemctl enable terranote-core
+if [ "$EUID" -eq 0 ]; then
+    systemctl enable terranote-adapter-telegram
+    systemctl enable terranote-core
+else
+    sudo systemctl enable terranote-adapter-telegram
+    sudo systemctl enable terranote-core
+fi
 echo -e "${GREEN}✓ Servicios habilitados${NC}"
 echo ""
 
 echo -e "${YELLOW}5. Iniciando servicios...${NC}"
-sudo systemctl start terranote-adapter-telegram
-sudo systemctl start terranote-core
+if [ "$EUID" -eq 0 ]; then
+    systemctl start terranote-adapter-telegram
+    systemctl start terranote-core
+else
+    sudo systemctl start terranote-adapter-telegram
+    sudo systemctl start terranote-core
+fi
 echo -e "${GREEN}✓ Servicios iniciados${NC}"
 echo ""
 
 echo -e "${YELLOW}6. Verificando estado...${NC}"
 echo ""
-sudo systemctl status terranote-adapter-telegram --no-pager -l | head -10
-echo ""
-sudo systemctl status terranote-core --no-pager -l | head -10
+if [ "$EUID" -eq 0 ]; then
+    systemctl status terranote-adapter-telegram --no-pager -l | head -10
+    echo ""
+    systemctl status terranote-core --no-pager -l | head -10
+else
+    sudo systemctl status terranote-adapter-telegram --no-pager -l | head -10
+    echo ""
+    sudo systemctl status terranote-core --no-pager -l | head -10
+fi
 echo ""
 
 echo -e "${GREEN}=== Instalación completada ===${NC}"
