@@ -1,0 +1,30 @@
+[Unit]
+Description=Terranote WhatsApp Adapter
+After=network.target
+
+[Service]
+Type=simple
+User=terranote
+Group=terranote
+WorkingDirectory=/home/terranote/terranote-adapter-whatsapp
+Environment="PATH=/home/terranote/terranote-adapter-whatsapp/.venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/home/terranote/terranote-adapter-whatsapp/.venv/bin/uvicorn terranote_adapter_whatsapp.main:app --host 0.0.0.0 --port 3001
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=terranote-adapter-whatsapp
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/terranote/terranote-adapter-whatsapp/logs
+
+# Resource limits (adjust as needed)
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+
