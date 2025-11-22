@@ -10,7 +10,7 @@ Group=terranote
 WorkingDirectory=/home/terranote/terranote-core
 Environment="PYTHONUNBUFFERED=1"
 EnvironmentFile=/home/terranote/terranote-core/.env
-ExecStart=/home/terranote/.local/bin/poetry run uvicorn app.main:app --host 127.0.0.1 --port 8002
+ExecStart=/home/terranote/.local/bin/poetry run uvicorn app.main:app --host 127.0.0.1 --port 3002
 Restart=always
 RestartSec=10
 StandardOutput=journal
