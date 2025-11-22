@@ -50,28 +50,29 @@ METRICS_PASSWORD=secure-password
 - Incluye ajustes de seguridad y permisos
 - Facilita la replicación en otros servidores
 
-### 3. Logs de Journald
+### 3. Logs de Journald (Opcional)
 
-**Ubicación en el backup:** `logs/journald/`
+**Ubicación en el backup:** `logs/journald/` (solo si `BACKUP_LOGS=true`)
 
-**Archivos generados:**
-- `adapter.log` - Logs completos del adaptador
-- `adapter_last_7days.log` - Logs de los últimos 7 días
-- `core.log` - Logs completos del Core
-- `core_last_7days.log` - Logs de los últimos 7 días
+**Por defecto:** Los logs NO se respaldan
 
-**Contiene:**
-- Historial completo de operaciones
-- Errores y warnings
-- Información de debugging
-- Trazas de requests y respuestas
+**Razón:** Los logs pueden ser muy grandes (varios MB o GB) y journald ya los mantiene de forma persistente. Los logs están disponibles en journald con:
+```bash
+sudo journalctl -u terranote-adapter-telegram
+sudo journalctl -u terranote-core
+```
 
-**¿Por qué es importante?**
-- Permite análisis post-mortem de incidentes
-- Facilita debugging de problemas históricos
-- Útil para auditorías y compliance
+**Si se habilita** (`BACKUP_LOGS=true`):
+- Solo respalda logs de los últimos 7 días (más manejable)
+- `adapter_last_7days.log` - Logs del adaptador (últimos 7 días)
+- `core_last_7days.log` - Logs del Core (últimos 7 días)
 
-**Nota:** Los logs completos pueden ser muy grandes. El script respalda ambos (completos y últimos 7 días) para flexibilidad.
+**¿Cuándo habilitar logs en backup?**
+- Si necesitas exportar logs para análisis externo
+- Si vas a migrar a otro servidor y quieres llevar logs
+- Si journald no está configurado para persistencia
+
+**Recomendación:** Mantener `BACKUP_LOGS=false` por defecto. Los logs están en journald y pueden consultarse cuando se necesiten.
 
 ### 4. Configuración de Infraestructura
 
@@ -127,14 +128,21 @@ METRICS_PASSWORD=secure-password
 ## Tamaño Típico de un Backup
 
 ```
-Backup típico:
+Backup típico (sin logs):
+- Configuración (.env): ~1-2 KB
+- Systemd services: ~2-3 KB
+- Infraestructura: ~50-100 KB
+- Total comprimido: ~100-200 KB
+
+Backup con logs (BACKUP_LOGS=true):
 - Configuración (.env): ~1-2 KB
 - Systemd services: ~2-3 KB
 - Logs (últimos 7 días): ~100 KB - 10 MB (depende del tráfico)
-- Logs completos: Variable (puede ser grande)
 - Infraestructura: ~50-100 KB
 - Total comprimido: ~500 KB - 50 MB (típicamente 1-5 MB)
 ```
+
+**Recomendación:** Mantener logs fuera del backup por defecto. Los backups serán más pequeños y rápidos.
 
 ## Frecuencia de Backup Recomendada
 
@@ -164,11 +172,9 @@ terranote_20251122_020000.tar.gz
     ├── systemd/
     │   ├── terranote-adapter-telegram.service
     │   └── terranote-core.service
-    ├── logs/
+    ├── logs/ (solo si BACKUP_LOGS=true)
     │   └── journald/
-    │       ├── adapter.log
     │       ├── adapter_last_7days.log
-    │       ├── core.log
     │       └── core_last_7days.log
     ├── infra/
     │   ├── systemd/

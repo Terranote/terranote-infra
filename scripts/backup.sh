@@ -15,6 +15,7 @@ BACKUP_BASE_DIR="${BACKUP_BASE_DIR:-/home/terranote/backups}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR="${BACKUP_BASE_DIR}/terranote_${TIMESTAMP}"
 RETENTION_DAYS="${RETENTION_DAYS:-7}"
+BACKUP_LOGS="${BACKUP_LOGS:-false}"  # Por defecto no respaldar logs (pueden ser muy grandes)
 
 # Directorios a respaldar
 TERRANOTE_HOME="/home/terranote"
@@ -98,23 +99,27 @@ if [ -f "${SYSTEMD_DIR}/terranote-core.service" ]; then
     backup_file "${SYSTEMD_DIR}/terranote-core.service" "${BACKUP_DIR}/systemd"
 fi
 
-# 3. Backup de logs de journald
-log_info "=== Respaldando logs de journald ==="
-JOURNAL_LOG_DIR="${BACKUP_DIR}/logs/journald"
-mkdir -p "${JOURNAL_LOG_DIR}"
+# 3. Backup de logs de journald (opcional, deshabilitado por defecto)
+# Los logs pueden ser muy grandes y journald ya los mantiene
+# Para habilitar, establecer BACKUP_LOGS=true
+if [ "${BACKUP_LOGS:-false}" = "true" ]; then
+    log_info "=== Respaldando logs de journald (opcional) ==="
+    JOURNAL_LOG_DIR="${BACKUP_DIR}/logs/journald"
+    mkdir -p "${JOURNAL_LOG_DIR}"
 
-# Exportar logs del adaptador
-if sudo journalctl -u terranote-adapter-telegram --no-pager >/dev/null 2>&1; then
-    log_info "Exportando logs del adaptador..."
-    sudo journalctl -u terranote-adapter-telegram --no-pager > "${JOURNAL_LOG_DIR}/adapter.log" 2>&1 || true
-    sudo journalctl -u terranote-adapter-telegram --since "7 days ago" --no-pager > "${JOURNAL_LOG_DIR}/adapter_last_7days.log" 2>&1 || true
-fi
+    # Exportar solo logs de los últimos 7 días (más manejable)
+    if sudo journalctl -u terranote-adapter-telegram --since "7 days ago" --no-pager >/dev/null 2>&1; then
+        log_info "Exportando logs del adaptador (últimos 7 días)..."
+        sudo journalctl -u terranote-adapter-telegram --since "7 days ago" --no-pager > "${JOURNAL_LOG_DIR}/adapter_last_7days.log" 2>&1 || true
+    fi
 
-# Exportar logs del core
-if sudo journalctl -u terranote-core --no-pager >/dev/null 2>&1; then
-    log_info "Exportando logs del core..."
-    sudo journalctl -u terranote-core --no-pager > "${JOURNAL_LOG_DIR}/core.log" 2>&1 || true
-    sudo journalctl -u terranote-core --since "7 days ago" --no-pager > "${JOURNAL_LOG_DIR}/core_last_7days.log" 2>&1 || true
+    if sudo journalctl -u terranote-core --since "7 days ago" --no-pager >/dev/null 2>&1; then
+        log_info "Exportando logs del core (últimos 7 días)..."
+        sudo journalctl -u terranote-core --since "7 days ago" --no-pager > "${JOURNAL_LOG_DIR}/core_last_7days.log" 2>&1 || true
+    fi
+else
+    log_info "=== Omitiendo logs de journald (BACKUP_LOGS no está habilitado) ==="
+    log_info "Los logs están disponibles en journald: sudo journalctl -u terranote-adapter-telegram"
 fi
 
 # 4. Backup de configuración de infraestructura (sin secrets)

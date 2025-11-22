@@ -26,8 +26,11 @@ export BACKUP_BASE_DIR=/ruta/personalizada/backups
 # Días de retención (por defecto: 7)
 export RETENTION_DAYS=14
 
+# Incluir logs en el backup (por defecto: false, no se respaldan)
+export BACKUP_LOGS=true
+
 # Ejecutar con configuración personalizada
-BACKUP_BASE_DIR=/backup/terranote RETENTION_DAYS=30 bash scripts/backup.sh
+BACKUP_BASE_DIR=/backup/terranote RETENTION_DAYS=30 BACKUP_LOGS=false bash scripts/backup.sh
 ```
 
 ### Automatización con Cron
@@ -103,10 +106,10 @@ El script respalda:
    - `terranote-adapter-telegram.service`
    - `terranote-core.service`
 
-3. **Logs de journald**
-   - Logs completos del adaptador
-   - Logs completos del core
-   - Logs de los últimos 7 días (separados)
+3. **Logs de journald** (opcional, deshabilitado por defecto)
+   - Los logs pueden ser muy grandes y journald ya los mantiene
+   - Para habilitar: `BACKUP_LOGS=true bash scripts/backup.sh`
+   - Si se habilita, solo respalda logs de los últimos 7 días
 
 4. **Configuración de infraestructura**
    - Archivos de systemd del repo
