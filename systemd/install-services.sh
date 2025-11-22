@@ -86,9 +86,11 @@ echo -e "${YELLOW}4. Habilitando servicios para inicio automático...${NC}"
 if [ "$EUID" -eq 0 ]; then
     systemctl enable terranote-adapter-telegram
     systemctl enable terranote-core
+    [ -f systemd/terranote-adapter-whatsapp.service ] && systemctl enable terranote-adapter-whatsapp || true
 else
     sudo systemctl enable terranote-adapter-telegram
     sudo systemctl enable terranote-core
+    [ -f systemd/terranote-adapter-whatsapp.service ] && sudo systemctl enable terranote-adapter-whatsapp || true
 fi
 echo -e "${GREEN}✓ Servicios habilitados${NC}"
 echo ""
@@ -97,9 +99,11 @@ echo -e "${YELLOW}5. Iniciando servicios...${NC}"
 if [ "$EUID" -eq 0 ]; then
     systemctl start terranote-adapter-telegram
     systemctl start terranote-core
+    [ -f systemd/terranote-adapter-whatsapp.service ] && systemctl start terranote-adapter-whatsapp || true
 else
     sudo systemctl start terranote-adapter-telegram
     sudo systemctl start terranote-core
+    [ -f systemd/terranote-adapter-whatsapp.service ] && sudo systemctl start terranote-adapter-whatsapp || true
 fi
 echo -e "${GREEN}✓ Servicios iniciados${NC}"
 echo ""
@@ -110,10 +114,12 @@ if [ "$EUID" -eq 0 ]; then
     systemctl status terranote-adapter-telegram --no-pager -l | head -10
     echo ""
     systemctl status terranote-core --no-pager -l | head -10
+    [ -f systemd/terranote-adapter-whatsapp.service ] && (echo ""; systemctl status terranote-adapter-whatsapp --no-pager -l | head -10) || true
 else
     sudo systemctl status terranote-adapter-telegram --no-pager -l | head -10
     echo ""
     sudo systemctl status terranote-core --no-pager -l | head -10
+    [ -f systemd/terranote-adapter-whatsapp.service ] && (echo ""; sudo systemctl status terranote-adapter-whatsapp --no-pager -l | head -10) || true
 fi
 echo ""
 
@@ -122,9 +128,11 @@ echo ""
 echo "Para ver los logs:"
 echo "  sudo journalctl -u terranote-adapter-telegram -f"
 echo "  sudo journalctl -u terranote-core -f"
+[ -f systemd/terranote-adapter-whatsapp.service ] && echo "  sudo journalctl -u terranote-adapter-whatsapp -f" || true
 echo ""
 echo "Para gestionar los servicios:"
 echo "  sudo systemctl status terranote-adapter-telegram"
 echo "  sudo systemctl restart terranote-adapter-telegram"
 echo "  sudo systemctl stop terranote-adapter-telegram"
+[ -f systemd/terranote-adapter-whatsapp.service ] && echo "  sudo systemctl status terranote-adapter-whatsapp" || true
 

@@ -65,6 +65,7 @@ Ubicación: `systemd/`
 Archivos de servicio systemd para gestionar los servicios de Terranote en producción:
 
 - `terranote-adapter-telegram.service` - Adaptador de Telegram
+- `terranote-adapter-whatsapp.service` - Adaptador de WhatsApp
 - `terranote-core.service` - API central
 
 Ver [`systemd/README.md`](systemd/README.md) para instrucciones de instalación y gestión.
@@ -76,6 +77,7 @@ Todos los servicios están configurados para usar journald de systemd. Los logs 
 ```bash
 # Ver logs en tiempo real
 sudo journalctl -u terranote-adapter-telegram -f
+sudo journalctl -u terranote-adapter-whatsapp -f
 sudo journalctl -u terranote-core -f
 ```
 

@@ -5,6 +5,7 @@ This directory contains systemd service files for managing Terranote services on
 ## Services
 
 - `terranote-adapter-telegram.service` - Telegram adapter service
+- `terranote-adapter-whatsapp.service` - WhatsApp adapter service
 - `terranote-core.service` - Core API service
 
 ## Installation
@@ -41,6 +42,7 @@ sudo systemctl daemon-reload
 
 ```bash
 sudo systemctl enable terranote-adapter-telegram
+sudo systemctl enable terranote-adapter-whatsapp
 sudo systemctl enable terranote-core
 ```
 
@@ -48,6 +50,7 @@ sudo systemctl enable terranote-core
 
 ```bash
 sudo systemctl start terranote-adapter-telegram
+sudo systemctl start terranote-adapter-whatsapp
 sudo systemctl start terranote-core
 ```
 
@@ -57,6 +60,7 @@ sudo systemctl start terranote-core
 
 ```bash
 sudo systemctl status terranote-adapter-telegram
+sudo systemctl status terranote-adapter-whatsapp
 sudo systemctl status terranote-core
 ```
 
@@ -65,24 +69,29 @@ sudo systemctl status terranote-core
 ```bash
 # Follow logs in real-time
 sudo journalctl -u terranote-adapter-telegram -f
+sudo journalctl -u terranote-adapter-whatsapp -f
 sudo journalctl -u terranote-core -f
 
 # View last 100 lines
 sudo journalctl -u terranote-adapter-telegram -n 100
+sudo journalctl -u terranote-adapter-whatsapp -n 100
 sudo journalctl -u terranote-core -n 100
 
 # View logs since today
 sudo journalctl -u terranote-adapter-telegram --since today
+sudo journalctl -u terranote-adapter-whatsapp --since today
 sudo journalctl -u terranote-core --since today
 
 # View logs with JSON output (for structured logs)
 sudo journalctl -u terranote-adapter-telegram -o json-pretty
+sudo journalctl -u terranote-adapter-whatsapp -o json-pretty
 ```
 
 ### Restart services
 
 ```bash
 sudo systemctl restart terranote-adapter-telegram
+sudo systemctl restart terranote-adapter-whatsapp
 sudo systemctl restart terranote-core
 ```
 
@@ -90,6 +99,7 @@ sudo systemctl restart terranote-core
 
 ```bash
 sudo systemctl stop terranote-adapter-telegram
+sudo systemctl stop terranote-adapter-whatsapp
 sudo systemctl stop terranote-core
 ```
 
@@ -97,6 +107,7 @@ sudo systemctl stop terranote-core
 
 ```bash
 sudo systemctl disable terranote-adapter-telegram
+sudo systemctl disable terranote-adapter-whatsapp
 sudo systemctl disable terranote-core
 ```
 
