@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
-# Script para corregir la configuración de cloudflared
-# Corrige el puerto del Core de 3002 a 8002
+# Script para verificar y corregir la configuración de cloudflared
+# Verifica que los puertos sean correctos:
+# - terranote-tg.osm.lat -> localhost:3000
+# - terranote-tg-metrics.osm.lat -> localhost:3000
+# - terranote-core-metrics.osm.lat -> localhost:3002
+# - terranote-wa.osm.lat -> localhost:3001
 
 set -euo pipefail
 
@@ -27,22 +31,24 @@ echo "2. Configuración actual:"
 grep -A 1 "terranote-core-metrics.osm.lat" "$CONFIG_FILE" || echo "   No encontrado"
 echo ""
 
-# Corregir puerto de 3002 a 8002
+# Verificar puerto del Core (debe ser 3002)
 if grep -q "terranote-core-metrics.osm.lat" "$CONFIG_FILE"; then
-    echo "3. Corrigiendo puerto de terranote-core-metrics..."
-    # Buscar la línea del hostname y la siguiente línea de service
-    sed -i '/terranote-core-metrics.osm.lat/,+1 {
-        /service:/ s|localhost:3002|localhost:8002|
-    }' "$CONFIG_FILE"
-    
-    echo "   ✓ Puerto corregido a 8002"
+    CORE_PORT=$(grep -A 1 "terranote-core-metrics.osm.lat" "$CONFIG_FILE" | grep "service:" | grep -o "localhost:[0-9]*" | cut -d: -f2)
+    if [ "$CORE_PORT" != "3002" ]; then
+        echo "3. Corrigiendo puerto de terranote-core-metrics de $CORE_PORT a 3002..."
+        sed -i '/terranote-core-metrics.osm.lat/,+1 {
+            /service:/ s|localhost:[0-9]*|localhost:3002|
+        }' "$CONFIG_FILE"
+        echo "   ✓ Puerto corregido a 3002"
+    else
+        echo "3. ✓ terranote-core-metrics ya está configurado correctamente (puerto 3002)"
+    fi
 else
-    echo "   ⚠️  Hostname terranote-core-metrics.osm.lat no encontrado"
+    echo "3. ⚠️  Hostname terranote-core-metrics.osm.lat no encontrado"
     echo "   Agregando configuración..."
-    # Agregar antes del catch-all
     sed -i '/- service: http_status:404/i\
  - hostname: terranote-core-metrics.osm.lat\
-   service: http://localhost:8002' "$CONFIG_FILE"
+   service: http://localhost:3002' "$CONFIG_FILE"
     echo "   ✓ Configuración agregada"
 fi
 
@@ -105,11 +111,14 @@ fi
 echo ""
 echo "=== Configuración completada ==="
 echo ""
-echo "Resumen de hostnames de métricas:"
+echo "Resumen de hostnames:"
+echo "  - terranote-wa.osm.lat -> http://localhost:3001"
+echo "  - terranote-tg.osm.lat -> http://localhost:3000"
 echo "  - terranote-tg-metrics.osm.lat -> http://localhost:3000/metrics"
-echo "  - terranote-core-metrics.osm.lat -> http://localhost:8002/metrics"
+echo "  - terranote-core-metrics.osm.lat -> http://localhost:3002/metrics"
 echo ""
 echo "Para verificar:"
+echo "  curl https://terranote-tg.osm.lat/health"
 echo "  curl -u admin:CONTRASEÑA https://terranote-tg-metrics.osm.lat/metrics"
 echo "  curl https://terranote-core-metrics.osm.lat/metrics"
 

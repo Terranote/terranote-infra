@@ -23,7 +23,7 @@ ingress:
  - hostname: terranote-tg-metrics.osm.lat
    service: http://localhost:3000
  - hostname: terranote-core-metrics.osm.lat
-   service: http://localhost:8002
+   service: http://localhost:3002
  - service: http_status:404
 ```
 
@@ -41,7 +41,7 @@ ingress:
 | Hostname | Servicio | Puerto | Path | Autenticación |
 |----------|----------|--------|------|---------------|
 | `terranote-tg-metrics.osm.lat` | Telegram Adapter | 3000 | `/metrics` | Basic Auth (admin) |
-| `terranote-core-metrics.osm.lat` | Core API | 8002 | `/metrics` | Sin autenticación |
+| `terranote-core-metrics.osm.lat` | Core API | 3002 | `/metrics` | Sin autenticación |
 
 ## Verificación
 
@@ -73,7 +73,7 @@ curl https://terranote-core-metrics.osm.lat/metrics | head -20
 
 ## Corrección de Configuración
 
-Si el puerto del Core está incorrecto (por ejemplo, apuntando a 3002 en lugar de 8002):
+Si algún puerto está incorrecto:
 
 ```bash
 # Ejecutar script de corrección
@@ -86,10 +86,11 @@ O manualmente:
 # Editar configuración
 sudo nano /etc/cloudflared/config.yml
 
-# Cambiar:
-#   service: http://localhost:3002
-# Por:
-#   service: http://localhost:8002
+# Verificar puertos correctos:
+#   - terranote-tg.osm.lat -> localhost:3000
+#   - terranote-tg-metrics.osm.lat -> localhost:3000
+#   - terranote-core-metrics.osm.lat -> localhost:3002
+#   - terranote-wa.osm.lat -> localhost:3001
 
 # Reiniciar servicio
 sudo systemctl restart cloudflared
@@ -148,11 +149,17 @@ Si un hostname apunta a un puerto incorrecto:
 
 1. Verificar puerto real del servicio:
    ```bash
-   # Para adaptador
+   # Para adaptador de Telegram (puerto 3000)
    sudo systemctl status terranote-adapter-telegram | grep port
    
-   # Para core
+   # Para adaptador de WhatsApp (puerto 3001)
+   # Verificar en el servicio correspondiente
+   
+   # Para core (puerto 3002)
    sudo systemctl status terranote-core | grep port
+   
+   # O verificar puertos en uso
+   sudo ss -tlnp | grep -E ':(3000|3001|3002)'
    ```
 
 2. Corregir en `/etc/cloudflared/config.yml`
