@@ -12,9 +12,9 @@ Este documento describe las mejoras opcionales y próximos pasos para el ecosist
 - ✅ Métricas: `note_publication_attempts`, `note_publication_successes`, etc.
 
 **Telegram Adapter:**
-- ✅ `/health` - Health check básico
-- ❌ Sin endpoint de métricas
-- ❌ Sin información detallada de salud
+- ✅ `/health` - Health check con información detallada (uptime, version, dependencias)
+- ✅ `/metrics` - Endpoint Prometheus
+- ✅ Métricas: HTTP requests, Core API calls, Telegram API calls, message processing
 
 ### Opciones de Monitoreo
 
@@ -129,7 +129,8 @@ Terranote Core   → /metrics → Prometheus → Grafana
 - ✅ Escenarios para WhatsApp
 - ✅ Scripts de prueba automatizados
 - ✅ Reportes en Markdown
-- ❌ Sin escenarios para Telegram
+- ✅ Escenarios para Telegram
+- ✅ Scripts de prueba E2E para Telegram (texto+ubicación, solo texto, solo ubicación)
 
 ### Extensión para Telegram
 
@@ -319,20 +320,29 @@ journalctl -u terranote-* --since "7 days ago" > "$BACKUP_DIR/logs.txt"
 
 ## Priorización
 
-### Alta Prioridad
+### Completado ✅
 1. ✅ Mejorar endpoint `/health` del adaptador
 2. ✅ Agregar endpoint `/metrics` al adaptador
-3. ⭐ Crear escenarios E2E para Telegram
+3. ✅ Crear escenarios E2E para Telegram
+4. ✅ Configurar Prometheus + Grafana
+5. ✅ Documentar runbooks básicos
+6. ✅ Script de backup automatizado
+7. ✅ Exponer métricas públicamente con Cloudflare Tunnel
 
-### Media Prioridad
-4. ⭐ Configurar Prometheus + Grafana
-5. ⭐ Documentar runbooks básicos
-6. ⭐ Script de backup automatizado
+### Próximos Pasos (Alta Prioridad)
+1. ⭐ Script de monitoreo automatizado con alertas
+2. ⭐ Configurar Alertmanager con reglas básicas
+3. ⭐ Automatizar backups con systemd timer
 
-### Baja Prioridad
+### Próximos Pasos (Media Prioridad)
+4. ⭐ Dashboards más detallados en Grafana
+5. ⭐ Integración con CI/CD para despliegues automáticos
+6. ⭐ Documentación de incidentes y post-mortems
+
+### Próximos Pasos (Baja Prioridad)
 7. ⭐ Alertmanager con reglas avanzadas
-8. ⭐ Dashboards detallados en Grafana
-9. ⭐ Integración con CI/CD
+8. ⭐ Métricas de negocio (notas creadas por día, usuarios activos, etc.)
+9. ⭐ Integración con servicios externos de monitoreo (UptimeRobot, etc.)
 
 ## Referencias
 
