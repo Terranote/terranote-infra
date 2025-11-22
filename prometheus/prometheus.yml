@@ -36,6 +36,10 @@ scrape_configs:
     scrape_interval: 15s
     scrape_timeout: 10s
     metrics_path: '/metrics'
+    # Basic auth is optional - uncomment if METRICS_USERNAME and METRICS_PASSWORD are configured
+    # basic_auth:
+    #   username: 'admin'
+    #   password: '${CORE_METRICS_PASSWORD}'
     static_configs:
       - targets:
           - 'host.docker.internal:8002'  # Access host from Docker

@@ -14,11 +14,11 @@ if [ ! -f "prometheus.yml" ]; then
     exit 1
 fi
 
-# Obtener la contraseña directamente del servidor (si estamos en el servidor)
+# Obtener la contraseña del adapter-telegram directamente del servidor (si estamos en el servidor)
 # O usar la variable de entorno si está disponible
 if [ -z "$METRICS_PASSWORD" ]; then
     if [ -f "/home/terranote/terranote-adapter-telegram/.env" ]; then
-        echo "🔍 Obteniendo contraseña del servidor..."
+        echo "🔍 Obteniendo contraseña del adapter-telegram del servidor..."
         METRICS_PASSWORD=$(grep METRICS_PASSWORD /home/terranote/terranote-adapter-telegram/.env | cut -d'=' -f2)
     elif [ -f ".env" ]; then
         echo "📋 Cargando contraseña de .env..."
@@ -38,19 +38,43 @@ if [ -z "$METRICS_PASSWORD" ] || [ "$METRICS_PASSWORD" = "your_metrics_password_
     exit 1
 fi
 
+# Obtener la contraseña de terranote-core (opcional)
+CORE_METRICS_PASSWORD=""
+if [ -z "$CORE_METRICS_PASSWORD" ]; then
+    if [ -f "/home/terranote/terranote-core/.env" ]; then
+        echo "🔍 Verificando si terranote-core tiene autenticación configurada..."
+        CORE_METRICS_PASSWORD=$(grep "^METRICS_PASSWORD=" /home/terranote/terranote-core/.env 2>/dev/null | cut -d'=' -f2 || echo "")
+    fi
+fi
+
 # Crear backup del prometheus.yml original si no existe
 if [ ! -f "prometheus.yml.backup" ]; then
     echo "💾 Creando backup de prometheus.yml..."
     cp prometheus.yml prometheus.yml.backup
 fi
 
-# Reemplazar la variable en prometheus.yml
+# Reemplazar las variables en prometheus.yml
 echo "🔐 Inyectando credenciales en prometheus.yml..."
 # Escapar caracteres especiales para sed
 ESCAPED_PASSWORD=$(printf '%s\n' "$METRICS_PASSWORD" | sed 's/[[\.*^$()+?{|]/\\&/g')
 sed -i.tmp "s/\${METRICS_PASSWORD}/$ESCAPED_PASSWORD/g" prometheus.yml 2>/dev/null || \
 sed -i "s/\${METRICS_PASSWORD}/$ESCAPED_PASSWORD/g" prometheus.yml
 rm -f prometheus.yml.tmp
+
+# Si terranote-core tiene autenticación configurada, habilitarla en prometheus.yml
+if [ -n "$CORE_METRICS_PASSWORD" ]; then
+    echo "🔐 Habilitando autenticación para terranote-core en prometheus.yml..."
+    ESCAPED_CORE_PASSWORD=$(printf '%s\n' "$CORE_METRICS_PASSWORD" | sed 's/[[\.*^$()+?{|]/\\&/g')
+    # Reemplazar las líneas comentadas de basic_auth con las descomentadas
+    sed -i.tmp "s|# Basic auth is optional - uncomment if METRICS_USERNAME and METRICS_PASSWORD are configured|# Basic auth enabled for terranote-core|g" prometheus.yml
+    sed -i.tmp "s|# basic_auth:|basic_auth:|g" prometheus.yml
+    sed -i.tmp "s|#   username: 'admin'|  username: 'admin'|g" prometheus.yml
+    sed -i.tmp "s|#   password: '\${CORE_METRICS_PASSWORD}'|  password: '$ESCAPED_CORE_PASSWORD'|g" prometheus.yml
+    rm -f prometheus.yml.tmp
+    echo "✅ Autenticación habilitada para terranote-core"
+else
+    echo "ℹ️  terranote-core no tiene autenticación configurada (opcional)"
+fi
 
 echo "✅ Configuración completada!"
 echo ""
