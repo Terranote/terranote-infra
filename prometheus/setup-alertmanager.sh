@@ -67,12 +67,17 @@ echo "  Username: $SMTP_USERNAME"
 echo "  Require TLS: ${SMTP_REQUIRE_TLS:-true}"
 echo ""
 
-# Verificar que alertmanager.yml existe
-if [ ! -f alertmanager.yml ]; then
-    echo "❌ Error: alertmanager.yml no encontrado"
-    exit 1
+# Verificar que alertmanager.yml.template existe
+if [ ! -f alertmanager.yml.template ]; then
+    echo "⚠️  alertmanager.yml.template no encontrado. Usando alertmanager.yml directamente."
+    echo "   Nota: Las variables de entorno deben estar configuradas en docker-compose.yml"
+else
+    echo "Generando alertmanager.yml desde template..."
+    envsubst < alertmanager.yml.template > alertmanager.yml
+    echo "✓ alertmanager.yml generado"
 fi
 
+echo ""
 echo "✓ Configuración lista"
 echo ""
 echo "Para iniciar Alertmanager:"
@@ -80,5 +85,8 @@ echo "  docker-compose up -d alertmanager"
 echo ""
 echo "Para verificar que funciona, puedes probar enviando una alerta de prueba:"
 echo "  curl -X POST http://localhost:9093/api/v1/alerts -d '[{\"labels\":{\"alertname\":\"test\"}}]'"
+echo ""
+echo "Para ver logs de Alertmanager:"
+echo "  docker-compose logs -f alertmanager"
 echo ""
 
