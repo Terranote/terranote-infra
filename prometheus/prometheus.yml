@@ -5,15 +5,15 @@ global:
     cluster: 'terranote-production'
     environment: 'production'
 
-# Alertmanager configuration (optional, for future use)
-# alerting:
-#   alertmanagers:
-#     - static_configs:
-#         - targets: ['alertmanager:9093']
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
 
-# Rule files (optional, for future use)
-# rule_files:
-#   - 'alerts.yml'
+# Rule files for alerting
+rule_files:
+  - 'alerts.yml'
 
 scrape_configs:
   # Terranote Telegram Adapter

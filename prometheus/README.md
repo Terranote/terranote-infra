@@ -95,12 +95,17 @@ sum(rate(terranote_adapter_telegram_messages_processed_total[5m]))
 
 ```
 prometheus/
-├── docker-compose.yml      # Docker Compose para Prometheus
-├── prometheus.yml          # Configuración de Prometheus (generado)
-├── prometheus.yml.template # Plantilla con variables (opcional)
+├── docker-compose.yml      # Docker Compose para Prometheus, Alertmanager y Grafana
+├── prometheus.yml          # Configuración de Prometheus
+├── alerts.yml              # Reglas de alerta para Prometheus
+├── alertmanager.yml        # Configuración de Alertmanager
 ├── .env.example            # Ejemplo de variables de entorno
 ├── .env                    # Variables de entorno (no commitear)
-└── README.md              # Esta documentación
+├── README.md              # Esta documentación
+├── README-alerting.md     # Documentación de alertas
+└── grafana/              # Configuración de Grafana
+    ├── provisioning/
+    └── dashboards/
 ```
 
 ## Acceso desde el Host
@@ -187,10 +192,29 @@ Grafana está incluido en el `docker-compose.yml` y se configura automáticament
 2. Ve a Configuration → Users → Change Password
 3. O modifica `GF_SECURITY_ADMIN_PASSWORD` en `docker-compose.yml`
 
+## Alertmanager
+
+Alertmanager está configurado para gestionar alertas. Ver [README-alerting.md](README-alerting.md) para más detalles.
+
+### Acceder a Alertmanager
+
+- **URL**: http://localhost:9093
+- Ver alertas activas, historial y silenciar alertas
+
+### Reglas de Alerta
+
+Las reglas están definidas en `alerts.yml` e incluyen:
+- Servicios caídos
+- Alta tasa de errores
+- Alta latencia
+- APIs no disponibles
+- Alto uso de recursos
+
 ## Próximos Pasos
 
-- [ ] Configurar Alertmanager para alertas
-- [ ] Crear reglas de alerta (ver `alerts.yml.example`)
+- [x] Configurar Alertmanager para alertas
+- [x] Crear reglas de alerta (ver `alerts.yml`)
+- [ ] Configurar notificaciones (email, Slack, etc.) en `alertmanager.yml`
 - [ ] Configurar retención de datos a largo plazo
 - [ ] Cambiar contraseña por defecto de Grafana en producción
 

@@ -1,0 +1,69 @@
+global:
+  # Default notification timeout
+  resolve_timeout: 5m
+
+  # Default notification receiver (can be overridden per route)
+  # receiver: 'default'
+
+# Route tree for alerts
+route:
+  # Default receiver for all alerts
+  receiver: 'default'
+  
+  # Group alerts by these labels
+  group_by: ['alertname', 'severity', 'job']
+  
+  # Wait time before sending a notification about a new group
+  group_wait: 10s
+  
+  # Wait time before sending a notification about new alerts in an existing group
+  group_interval: 10s
+  
+  # Minimum time between two notifications for the same group
+  repeat_interval: 12h
+  
+  # Child routes (can be used for more specific routing)
+  routes:
+    # Critical alerts go to critical receiver
+    - match:
+        severity: critical
+      receiver: 'critical'
+      continue: false
+    
+    # Warning alerts go to default receiver
+    - match:
+        severity: warning
+      receiver: 'default'
+      continue: false
+
+# Inhibition rules (suppress alerts when other alerts are firing)
+inhibit_rules:
+  # Suppress warning alerts when critical alerts are firing
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['job']
+
+# Receivers define where alerts are sent
+receivers:
+  # Default receiver (for warnings and info)
+  - name: 'default'
+    # For now, just log to console
+    # You can add email, Slack, webhook, etc.
+    webhook_configs:
+      - url: 'http://localhost:9093/api/v1/alerts'
+        send_resolved: true
+
+  # Critical receiver (for critical alerts)
+  - name: 'critical'
+    # For now, just log to console
+    # TODO: Configure email, Slack, or PagerDuty for critical alerts
+    webhook_configs:
+      - url: 'http://localhost:9093/api/v1/alerts'
+        send_resolved: true
+
+# Templates for notification formatting (optional)
+# templates:
+#   - '/etc/alertmanager/templates/*.tmpl'
+

@@ -1,0 +1,102 @@
+groups:
+  - name: terranote_services
+    interval: 30s
+    rules:
+      # Service Down Alerts
+      - alert: ServiceDown
+        expr: up{job=~"terranote-.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} has been down for more than 1 minute."
+
+      # High Error Rate
+      - alert: HighErrorRate
+        expr: |
+          (
+            rate(terranote_adapter_telegram_http_requests_total{status=~"5.."}[5m]) /
+            rate(terranote_adapter_telegram_http_requests_total[5m])
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate in {{ $labels.job }}"
+          description: "Error rate is {{ $value | humanizePercentage }} for the last 5 minutes (threshold: 5%)."
+
+      # High Latency (p95)
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(terranote_adapter_telegram_http_request_duration_seconds_bucket[5m])
+          ) > 1.0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High latency in {{ $labels.job }}"
+          description: "P95 latency is {{ $value }}s (threshold: 1s) for the last 5 minutes."
+
+      # Core API Unavailable
+      - alert: CoreAPIUnavailable
+        expr: |
+          rate(terranote_adapter_telegram_core_api_calls_total{status="error"}[5m]) /
+          rate(terranote_adapter_telegram_core_api_calls_total[5m]) > 0.5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Core API is experiencing high failure rate"
+          description: "More than 50% of Core API calls are failing for the last 2 minutes."
+
+      # Telegram API Unavailable
+      - alert: TelegramAPIUnavailable
+        expr: |
+          rate(terranote_adapter_telegram_telegram_api_calls_total{status="error"}[5m]) /
+          rate(terranote_adapter_telegram_telegram_api_calls_total[5m]) > 0.5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Telegram API is experiencing high failure rate"
+          description: "More than 50% of Telegram API calls are failing for the last 2 minutes."
+
+      # High Message Failure Rate
+      - alert: HighMessageFailureRate
+        expr: |
+          rate(terranote_adapter_telegram_messages_failed_total[5m]) /
+          (rate(terranote_adapter_telegram_messages_processed_total[5m]) + rate(terranote_adapter_telegram_messages_failed_total[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High message failure rate"
+          description: "{{ $value | humanizePercentage }} of messages are failing (threshold: 10%)."
+
+  - name: terranote_system
+    interval: 30s
+    rules:
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: |
+          (process_resident_memory_bytes / 1024 / 1024) > 500
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage in {{ $labels.job }}"
+          description: "Memory usage is {{ $value }}MB (threshold: 500MB)."
+
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: |
+          rate(process_cpu_user_seconds_total[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage in {{ $labels.job }}"
+          description: "CPU usage is {{ $value | humanizePercentage }} (threshold: 80%)."
+
