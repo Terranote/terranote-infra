@@ -108,10 +108,15 @@ receivers:
    - Genera una contraseña de aplicación
    - Úsala como `SMTP_PASSWORD`
 
-4. **Ejecuta el script de configuración** (opcional, verifica variables):
+4. **Genera `alertmanager.yml` desde el template**:
    ```bash
    bash setup-alertmanager.sh
    ```
+   
+   Este script:
+   - Verifica que todas las variables estén configuradas
+   - Genera `alertmanager.yml` desde `alertmanager.yml.template` usando `envsubst`
+   - Muestra la configuración SMTP que se usará
 
 ### Iniciar los servicios
 
