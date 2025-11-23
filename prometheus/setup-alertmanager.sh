@@ -67,14 +67,14 @@ echo "  Username: $SMTP_USERNAME"
 echo "  Require TLS: ${SMTP_REQUIRE_TLS:-true}"
 echo ""
 
-# Verificar que alertmanager.yml.template existe
-if [ ! -f alertmanager.yml.template ]; then
-    echo "⚠️  alertmanager.yml.template no encontrado. Usando alertmanager.yml directamente."
-    echo "   Nota: Las variables de entorno deben estar configuradas en docker-compose.yml"
-else
+# Generar alertmanager.yml desde template usando envsubst
+if [ -f alertmanager.yml.template ]; then
     echo "Generando alertmanager.yml desde template..."
     envsubst < alertmanager.yml.template > alertmanager.yml
     echo "✓ alertmanager.yml generado"
+else
+    echo "⚠️  alertmanager.yml.template no encontrado."
+    echo "   Asegúrate de que alertmanager.yml tenga las variables correctas."
 fi
 
 echo ""
