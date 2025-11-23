@@ -1,0 +1,27 @@
+[Unit]
+Description=Terranote Health Monitoring
+Documentation=https://github.com/Terranote/terranote-infra
+After=network.target
+
+[Service]
+Type=oneshot
+User=terranote
+Group=terranote
+WorkingDirectory=/home/terranote/terranote-infra
+Environment="ADAPTER_URL=http://localhost:3000"
+Environment="CORE_URL=http://localhost:8002"
+ExecStart=/usr/bin/bash /home/terranote/terranote-infra/scripts/monitor-health.sh
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=terranote-monitor-health
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/log
+
+[Install]
+WantedBy=multi-user.target
+

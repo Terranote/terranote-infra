@@ -9,6 +9,8 @@ This directory contains systemd service files for managing Terranote services on
 - `terranote-core.service` - Core API service
 - `terranote-backup.service` - Backup service (oneshot, triggered by timer)
 - `terranote-backup.timer` - Timer for automated daily backups at 2:00 AM
+- `terranote-monitor-health.service` - Health monitoring service (oneshot, triggered by timer)
+- `terranote-monitor-health.timer` - Timer for automated health checks every 5 minutes
 
 ## Installation
 
@@ -136,6 +138,29 @@ sudo journalctl -u terranote-backup.service -n 50
 # Disable automatic backups
 sudo systemctl stop terranote-backup.timer
 sudo systemctl disable terranote-backup.timer
+```
+
+### Health Monitoring Timer Management
+
+The health monitoring timer runs every 5 minutes. To manage it:
+
+```bash
+# Check timer status
+sudo systemctl status terranote-monitor-health.timer
+
+# List next scheduled runs
+sudo systemctl list-timers terranote-monitor-health.timer
+
+# Manually trigger a health check (without waiting for timer)
+sudo systemctl start terranote-monitor-health.service
+
+# View monitoring logs
+sudo journalctl -u terranote-monitor-health.service -n 50
+sudo journalctl -u terranote-monitor-health.service -f  # Follow logs
+
+# Disable automatic monitoring
+sudo systemctl stop terranote-monitor-health.timer
+sudo systemctl disable terranote-monitor-health.timer
 ```
 
 ## Logging with journald

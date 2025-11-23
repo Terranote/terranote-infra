@@ -68,9 +68,11 @@ echo -e "${YELLOW}2. Copiando archivos de servicio a /etc/systemd/system/...${NC
 if [ "$EUID" -eq 0 ]; then
     cp systemd/*.service /etc/systemd/system/
     [ -f systemd/terranote-backup.timer ] && cp systemd/terranote-backup.timer /etc/systemd/system/ || true
+    [ -f systemd/terranote-monitor-health.timer ] && cp systemd/terranote-monitor-health.timer /etc/systemd/system/ || true
 else
     sudo cp systemd/*.service /etc/systemd/system/
     [ -f systemd/terranote-backup.timer ] && sudo cp systemd/terranote-backup.timer /etc/systemd/system/ || true
+    [ -f systemd/terranote-monitor-health.timer ] && sudo cp systemd/terranote-monitor-health.timer /etc/systemd/system/ || true
 fi
 echo -e "${GREEN}✓ Archivos copiados${NC}"
 echo ""
@@ -90,11 +92,13 @@ if [ "$EUID" -eq 0 ]; then
     systemctl enable terranote-core
     [ -f systemd/terranote-adapter-whatsapp.service ] && systemctl enable terranote-adapter-whatsapp || true
     [ -f systemd/terranote-backup.timer ] && systemctl enable terranote-backup.timer || true
+    [ -f systemd/terranote-monitor-health.timer ] && systemctl enable terranote-monitor-health.timer || true
 else
     sudo systemctl enable terranote-adapter-telegram
     sudo systemctl enable terranote-core
     [ -f systemd/terranote-adapter-whatsapp.service ] && sudo systemctl enable terranote-adapter-whatsapp || true
     [ -f systemd/terranote-backup.timer ] && sudo systemctl enable terranote-backup.timer || true
+    [ -f systemd/terranote-monitor-health.timer ] && sudo systemctl enable terranote-monitor-health.timer || true
 fi
 echo -e "${GREEN}✓ Servicios habilitados${NC}"
 echo ""
@@ -105,11 +109,13 @@ if [ "$EUID" -eq 0 ]; then
     systemctl start terranote-core
     [ -f systemd/terranote-adapter-whatsapp.service ] && systemctl start terranote-adapter-whatsapp || true
     [ -f systemd/terranote-backup.timer ] && systemctl start terranote-backup.timer || true
+    [ -f systemd/terranote-monitor-health.timer ] && systemctl start terranote-monitor-health.timer || true
 else
     sudo systemctl start terranote-adapter-telegram
     sudo systemctl start terranote-core
     [ -f systemd/terranote-adapter-whatsapp.service ] && sudo systemctl start terranote-adapter-whatsapp || true
     [ -f systemd/terranote-backup.timer ] && sudo systemctl start terranote-backup.timer || true
+    [ -f systemd/terranote-monitor-health.timer ] && sudo systemctl start terranote-monitor-health.timer || true
 fi
 echo -e "${GREEN}✓ Servicios iniciados${NC}"
 echo ""
@@ -142,4 +148,5 @@ echo "  sudo systemctl restart terranote-adapter-telegram"
 echo "  sudo systemctl stop terranote-adapter-telegram"
 [ -f systemd/terranote-adapter-whatsapp.service ] && echo "  sudo systemctl status terranote-adapter-whatsapp" || true
 [ -f systemd/terranote-backup.timer ] && echo "" && echo "Para gestionar el backup automático:" && echo "  sudo systemctl status terranote-backup.timer" && echo "  sudo systemctl list-timers terranote-backup.timer" || true
+[ -f systemd/terranote-monitor-health.timer ] && echo "" && echo "Para gestionar el monitoreo de salud:" && echo "  sudo systemctl status terranote-monitor-health.timer" && echo "  sudo systemctl list-timers terranote-monitor-health.timer" && echo "  sudo journalctl -u terranote-monitor-health.service -f" || true
 
