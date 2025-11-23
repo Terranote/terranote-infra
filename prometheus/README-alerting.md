@@ -37,34 +37,41 @@ El archivo `alertmanager.yml` define:
 
 ### Rutas (Routes)
 
-- **Critical alerts** → van al receptor `critical`
-- **Warning alerts** → van al receptor `default`
+- **Critical alerts** → van al receptor `critical` (envía email a terranote@osm.lat)
+- **Warning alerts** → van al receptor `default` (solo logging por ahora)
 
 ### Receptores (Receivers)
 
-Actualmente configurados con webhooks básicos. Para producción, deberías configurar:
+- **Critical**: Envía emails a `terranote@osm.lat` cuando hay alertas críticas
+- **Default**: Logging básico (puedes agregar Slack, webhooks, etc. si lo necesitas)
 
-- **Email**: Para alertas críticas
-- **Slack**: Para notificaciones del equipo
-- **PagerDuty/Opsgenie**: Para alertas críticas fuera de horario
-- **Webhook**: Para integraciones personalizadas
+### Configuración de Email (Ya Configurado)
 
-### Ejemplo: Configurar Email
+El email está configurado para alertas críticas. Para configurarlo:
 
-```yaml
-receivers:
-  - name: 'critical'
-    email_configs:
-      - to: 'ops@example.com'
-        from: 'alertmanager@terranote.local'
-        smarthost: 'smtp.example.com:587'
-        auth_username: 'alertmanager'
-        auth_password: 'password'
-        headers:
-          Subject: 'CRITICAL: {{ .GroupLabels.alertname }}'
-```
+1. **Edita el archivo `.env`** en el directorio `prometheus/`:
+   ```bash
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_FROM=terranote@osm.lat
+   SMTP_USERNAME=terranote@osm.lat
+   SMTP_PASSWORD=tu_contraseña_aquí
+   SMTP_REQUIRE_TLS=true
+   ```
 
-### Ejemplo: Configurar Slack
+2. **Para Gmail**, necesitas usar una "App Password":
+   - Ve a https://myaccount.google.com/apppasswords
+   - Genera una contraseña de aplicación
+   - Úsala como `SMTP_PASSWORD`
+
+3. **Reinicia Alertmanager**:
+   ```bash
+   docker-compose restart alertmanager
+   ```
+
+Las alertas críticas se enviarán automáticamente a `terranote@osm.lat`.
+
+### Ejemplo: Configurar Slack (Opcional)
 
 ```yaml
 receivers:
@@ -77,6 +84,34 @@ receivers:
 ```
 
 ## Uso
+
+### Configurar Email (Primera vez)
+
+1. **Copia el archivo de ejemplo**:
+   ```bash
+   cd /home/terranote/terranote-infra/prometheus
+   cp env.example .env
+   ```
+
+2. **Edita `.env`** y configura las credenciales SMTP:
+   ```bash
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_FROM=terranote@osm.lat
+   SMTP_USERNAME=terranote@osm.lat
+   SMTP_PASSWORD=tu_app_password_aquí
+   SMTP_REQUIRE_TLS=true
+   ```
+
+3. **Para Gmail**, necesitas una "App Password":
+   - Ve a https://myaccount.google.com/apppasswords
+   - Genera una contraseña de aplicación
+   - Úsala como `SMTP_PASSWORD`
+
+4. **Ejecuta el script de configuración** (opcional, verifica variables):
+   ```bash
+   bash setup-alertmanager.sh
+   ```
 
 ### Iniciar los servicios
 

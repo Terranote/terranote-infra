@@ -2,6 +2,13 @@ global:
   # Default notification timeout
   resolve_timeout: 5m
 
+  # SMTP configuration for email notifications
+  smtp_smarthost: '${SMTP_HOST}:${SMTP_PORT}'
+  smtp_from: '${SMTP_FROM}'
+  smtp_auth_username: '${SMTP_USERNAME}'
+  smtp_auth_password: '${SMTP_PASSWORD}'
+  smtp_require_tls: ${SMTP_REQUIRE_TLS:-true}
+
   # Default notification receiver (can be overridden per route)
   # receiver: 'default'
 
@@ -57,11 +64,33 @@ receivers:
 
   # Critical receiver (for critical alerts)
   - name: 'critical'
-    # For now, just log to console
-    # TODO: Configure email, Slack, or PagerDuty for critical alerts
-    webhook_configs:
-      - url: 'http://localhost:9093/api/v1/alerts'
+    email_configs:
+      - to: 'terranote@osm.lat'
         send_resolved: true
+        headers:
+          Subject: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+        html: |
+          <h2>Alerta Crítica: {{ .GroupLabels.alertname }}</h2>
+          <p><strong>Severidad:</strong> {{ .CommonLabels.severity }}</p>
+          <p><strong>Servicio:</strong> {{ .CommonLabels.job }}</p>
+          <hr>
+          <h3>Detalles:</h3>
+          {{ range .Alerts }}
+          <p><strong>Descripción:</strong> {{ .Annotations.description }}</p>
+          <p><strong>Resumen:</strong> {{ .Annotations.summary }}</p>
+          <p><strong>Inicio:</strong> {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}</p>
+          {{ if .EndsAt }}
+          <p><strong>Resuelto:</strong> {{ .EndsAt.Format "2006-01-02 15:04:05 UTC" }}</p>
+          {{ end }}
+          <p><strong>Labels:</strong></p>
+          <ul>
+          {{ range .Labels.SortedPairs }}
+            <li><strong>{{ .Name }}:</strong> {{ .Value }}</li>
+          {{ end }}
+          </ul>
+          {{ end }}
+          <hr>
+          <p><small>Enviado por Alertmanager - Terranote Monitoring</small></p>
 
 # Templates for notification formatting (optional)
 # templates:
