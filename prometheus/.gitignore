@@ -1,6 +1,9 @@
 # Environment variables with secrets
 .env
 
+# Generated alertmanager.yml (contains SMTP credentials)
+alertmanager.yml
+
 # Backup files
 *.backup
 *.tmp
