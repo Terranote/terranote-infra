@@ -1,0 +1,25 @@
+[Unit]
+Description=Terranote Backup
+Documentation=https://github.com/Terranote/terranote-infra
+After=network.target
+
+[Service]
+Type=oneshot
+User=terranote
+Group=terranote
+WorkingDirectory=/home/terranote/terranote-infra
+ExecStart=/usr/bin/bash /home/terranote/terranote-infra/scripts/backup.sh
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=terranote-backup
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/terranote/backups
+
+[Install]
+WantedBy=multi-user.target
+

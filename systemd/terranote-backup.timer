@@ -1,0 +1,17 @@
+[Unit]
+Description=Run Terranote Backup Daily
+Documentation=https://github.com/Terranote/terranote-infra
+Requires=terranote-backup.service
+
+[Timer]
+# Run daily at 2:00 AM
+OnCalendar=daily
+OnCalendar=02:00
+# If the system was off, run immediately after boot
+Persistent=true
+# Add some randomization to avoid all systems backing up at the same time
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
+

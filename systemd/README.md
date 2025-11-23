@@ -7,6 +7,8 @@ This directory contains systemd service files for managing Terranote services on
 - `terranote-adapter-telegram.service` - Telegram adapter service
 - `terranote-adapter-whatsapp.service` - WhatsApp adapter service
 - `terranote-core.service` - Core API service
+- `terranote-backup.service` - Backup service (oneshot, triggered by timer)
+- `terranote-backup.timer` - Timer for automated daily backups at 2:00 AM
 
 ## Installation
 
@@ -44,6 +46,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable terranote-adapter-telegram
 sudo systemctl enable terranote-adapter-whatsapp
 sudo systemctl enable terranote-core
+sudo systemctl enable terranote-backup.timer  # Enable backup timer
 ```
 
 #### 4. Start services
@@ -52,6 +55,7 @@ sudo systemctl enable terranote-core
 sudo systemctl start terranote-adapter-telegram
 sudo systemctl start terranote-adapter-whatsapp
 sudo systemctl start terranote-core
+sudo systemctl start terranote-backup.timer  # Start backup timer
 ```
 
 ## Management
@@ -109,6 +113,29 @@ sudo systemctl stop terranote-core
 sudo systemctl disable terranote-adapter-telegram
 sudo systemctl disable terranote-adapter-whatsapp
 sudo systemctl disable terranote-core
+sudo systemctl disable terranote-backup.timer
+```
+
+### Backup Timer Management
+
+The backup timer runs daily at 2:00 AM. To manage it:
+
+```bash
+# Check timer status
+sudo systemctl status terranote-backup.timer
+
+# List next scheduled runs
+sudo systemctl list-timers terranote-backup.timer
+
+# Manually trigger a backup (without waiting for timer)
+sudo systemctl start terranote-backup.service
+
+# View backup logs
+sudo journalctl -u terranote-backup.service -n 50
+
+# Disable automatic backups
+sudo systemctl stop terranote-backup.timer
+sudo systemctl disable terranote-backup.timer
 ```
 
 ## Logging with journald
